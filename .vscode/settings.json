@@ -1,5 +1,8 @@
 {
+    "emmet.includeLanguages": {
+        "postcss": "css"
+    },
     "files.associations": {
-        "*.css": "tailwindcss"
+        "*.scss": "postcss"
     }
 }

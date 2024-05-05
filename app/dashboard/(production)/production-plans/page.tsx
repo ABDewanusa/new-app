@@ -1,7 +1,7 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Production-Plans',
+  title: "Production-Plans",
 };
 
 export default function Page() {

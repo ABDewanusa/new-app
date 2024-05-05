@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -15,7 +16,7 @@ model Post {
   published Boolean @default(false)
   authorId  String?
   author    User?   @relation(fields: [authorId], references: [id])
-  
+
   @@map("posts")
 }
 
@@ -64,7 +65,7 @@ model Order {
   customer    Customer?      @relation(fields: [customerId], references: [id])
   customerId  String         @default("CUSTOMER_404")
   orderedAt   DateTime       @default(now()) @map("order_date")
-  deliveryAt  DateTime?
+  deliveryAt  DateTime?      @default(dbgenerated("NOW() + interval '1 day'"))
   orderlist   OrderProduct[]
   isMade      Boolean        @default(false)
   isDelivered Boolean        @default(false)
