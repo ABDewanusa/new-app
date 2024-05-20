@@ -35,7 +35,7 @@ export async function deleteOrder(id: String) {
 
 }
 
-export async function editOrder(data: Order) {
+export async function updateOrder(data: Order) {
     const feedback: {
         message: String,
         data: Object,
