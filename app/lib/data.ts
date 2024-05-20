@@ -1,10 +1,11 @@
+'use server'
 import prisma from "@/lib/prisma"
 import { unstable_noStore as noStore } from 'next/cache';
-import { formatDateTime } from "@/app/lib/utils"
 
 export async function fetchOrders() {
     noStore();
     try {
+
         console.log('Fetching orders data...');
         const res = await prisma.order.findMany({
             orderBy: {
@@ -14,36 +15,89 @@ export async function fetchOrders() {
                 id: true,
                 orderedAt: true,
                 deliveryAt: true,
-                isMade: true,
-                isDelivered: true,
                 isPaid: true,
-                customer: { select: { name: true } },
-                orderlist: { select: { quantity: true, product: { select: { name: true, } } } }
+                orderStatus: { select: { status: true } },
+                // orderStatus: true,
+                customer: { select: { id: true, name: true } },
+                orderlist: { select: { quantity: true, product: { select: { id: true, name: true, } } } },
+
             }
         })
+
         // console.log(res)
-
-        const formatter = new Intl.DateTimeFormat('id-ID', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-        });
-
-        const simplified = res.map((a) => ({
-            id: a.id,
-            customer_name: a.customer?.name || "n/a",
-            status: a.isPaid ? "Paid" : a.isDelivered ? "Delivered" : a.isMade ? "Made" : "in Production",
-            orderlist: a.orderlist.map((p) => (p.quantity + " x " + p.product?.name + "; ")),
-            orderedAt: formatDateTime(a.orderedAt),
-            deliveryAt: a.deliveryAt ? formatDateTime(a.deliveryAt) : "n/a"
+        const formatted = res.map((o) => ({
+            id: o.id,
+            customer: {
+                id: o.customer?.id || "?",
+                name: o.customer?.name || "?",
+            },
+            status: o.orderStatus.status,
+            payment: o.isPaid ? "Paid" : "Not Paid",
+            orderlist: o.orderlist.map((op) => ({ product_id: op.product?.id || "?", product_name: op.product?.name || "?", quantity: op.quantity || 0, })),
+            orderedAt: o.orderedAt || new Date(),
+            deliveryAt: o.deliveryAt || new Date()
         }))
-        // console.log(simplified)
+
+        // console.log(formatted)
 
         console.log('Data fetch completed.');
 
-        return simplified
+        return formatted
 
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to fetch orders data.');
     }
+}
+
+export async function fetchProducts() {
+    noStore();
+    try {
+        console.log('Fetching products data...');
+        const res = await prisma.product.findMany({
+            select: {
+                id: true,
+                name: true
+            }
+        })
+
+        const formatted = res.map((p) => ({
+            id: p.id,
+            product_name: p.name || "?"
+        }))
+
+        console.log('Data fetch completed.');
+        return formatted
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch products data.');
+    }
+
+}
+
+export async function fetchCustomers() {
+    noStore();
+    try {
+        console.log('Fetching customers data...');
+        const res = await prisma.customer.findMany({
+            select: {
+                id: true,
+                name: true
+            }
+        })
+
+        const formatted = res.map((c) => ({
+            id: c.id,
+            name: c.name || "?"
+        }))
+
+        console.log('Data fetch completed.');
+        return formatted
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch customers data.');
+    }
+
 }

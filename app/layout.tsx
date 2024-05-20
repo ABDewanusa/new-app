@@ -7,8 +7,6 @@ export const metadata: Metadata = {
     template: '%s | eBakery',
     default: 'eBakery',
   },
-  description: 'The official Next.js Course Dashboard, built with App Router.',
-  metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
 };
 
 export default function RootLayout({
