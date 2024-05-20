@@ -43,14 +43,14 @@ export async function updateOrder(data: Order) {
     } = { message: "", data: {}, severity: "info" }
 
     const formatted = {
-        customer: { connect: { id: data.customer.id } },
+        customer: { connect: { id: data.customer.id.toString() } },
         orderlist: {
             createMany: {
-                data: data.orderlist.map((o) => ({ quantity: o.quantity, productId: o.product_id }))
+                data: data.orderlist.map((o) => ({ quantity: o.quantity.valueOf(), productId: o.product_id.toString() }))
             }
         },
-        orderedAt: data.orderedAt,
-        deliveryAt: data.deliveryAt
+        orderedAt: data.orderedAt ?? undefined,
+        deliveryAt: data.deliveryAt ?? undefined
     }
 
     try {
@@ -79,14 +79,15 @@ export async function createOrder(data: Order) {
     } = { message: "", data: {}, severity: "info" }
 
     const formatted = {
-        customer: { connect: { id: data.customer.id } },
+        customer: { connect: { id: data.customer.id.toString() } },
         orderlist: {
             createMany: {
-                data: data.orderlist.map((o) => ({ quantity: o.quantity, productId: o.product_id }))
+                data: data.orderlist.map((o) => ({ quantity: o.quantity.valueOf(), productId: o.product_id.toString() }))
             }
         },
-        orderedAt: data.orderedAt,
-        deliveryAt: data.deliveryAt
+
+        orderedAt: data.orderedAt ?? undefined,
+        deliveryAt: data.deliveryAt ?? undefined
     }
 
     try {
