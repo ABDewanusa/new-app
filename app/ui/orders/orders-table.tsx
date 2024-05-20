@@ -113,7 +113,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
             <>
                 {rowData.orderlist.map((a) => {
                     return (
-                        <p><i className="pi pi-at" style={{ fontSize: '0.75rem' }}></i> {a.quantity.toString()} x {a.product_name}</p>
+                        <p key={a.product_id.toString()}><i className="pi pi-at" style={{ fontSize: '0.75rem' }}></i> {a.quantity.toString()} x {a.product_name}</p>
                     )
                 })}
             </>
@@ -261,8 +261,8 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
                 <div className='mb-2'>
                     <p>{JSON.stringify(order)}</p>
                     <p>{JSON.stringify(productQuantity)}</p>
-                    <label>Pemesan:</label>
-                    <Dropdown id='customer' value={order.customer}
+                    <label htmlFor='Customer'>Pemesan:</label>
+                    <Dropdown name='customer' inputId='Customer' value={order.customer}
                         onChange={(e) => setOrder({ ...order, customer: e.value })}
                         options={customers} optionLabel="name"
                         placeholder="Select a customer" className="w-full"
@@ -270,17 +270,17 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
                 </div>
 
                 <div className='mb-2'>
-                    <label>Tanggal Pesan:</label>
-                    <Calendar id='orderedAt' value={order.orderedAt}
+                    <label htmlFor='OrderedAt'>Tanggal Pesan:</label>
+                    <Calendar name='orderedAt' inputId='OrderedAt' value={order.orderedAt}
                         onChange={(e) => setOrder({ ...order, orderedAt: e.value })}
                     />
                 </div>
 
                 <div className='mb-2'>
-                    <label>Pesanan:</label>
+                    <label htmlFor='Product'>Pesanan:</label>
                     <div className='grid grid-nogutter'>
                         <div className="col-fixed mr-3" style={{ "width": "100px" }}>
-                            <InputNumber id='productQuantity' inputId="minmax-buttons" value={productQuantity}
+                            <InputNumber name='productQuantity' inputId='ProductQuantity' value={productQuantity}
                                 onValueChange={(e: InputNumberValueChangeEvent) => setProductQuantity(e.value ?? 0)}
                                 mode="decimal" showButtons min={0} max={100}
                                 incrementButtonClassName='p-button-success'
@@ -288,20 +288,20 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
                             />
                         </div>
                         <div className='col mr-3'>
-                            <Dropdown id="product" value={product} onChange={(e) => setProduct(e.value)}
+                            <Dropdown name="product" inputId="Product" value={product} onChange={(e) => setProduct(e.value)}
                                 options={products} optionLabel="product_name"
                                 placeholder="Select a Product" className="w-full"
                             />
                         </div>
                         <div className="col-fixed float-right mr-3" style={{ "width": "25px" }}>
-                            <Button id='addProductQty' className="" severity="success"
+                            <Button name='addProductQty' id='addProductQty' className="" severity="success"
                                 icon="pi pi-plus" onClick={addOrderProduct}></Button>
                         </div>
                     </div>
                     {order.orderlist.length > 0 && (
                         <div className='card my-3'>
 
-                            <DataTable value={order.orderlist} size='small'>
+                            <DataTable dataKey="product_id" value={order.orderlist} size='small'>
                                 <Column field="quantity" header="Qty"></Column>
                                 <Column field="product_name" header="Product"></Column>
                                 <Column body={actionBodyDeleteOrderProduct} style={{ minWidth: '8rem' }}></Column>
@@ -311,8 +311,8 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
 
                 </div>
                 <div className='mb-2'>
-                    <label>Deadline pengiriman:</label>
-                    <Calendar value={order.deliveryAt}
+                    <label htmlFor='deliveryAt'>Deadline pengiriman:</label>
+                    <Calendar name='deliveryAt' inputId='deliveryAt' value={order.deliveryAt}
                         minDate={defaultOrderDate}
                         onChange={(e) => setOrder({ ...order, deliveryAt: e.value })}
                     />
@@ -320,7 +320,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
                 <div className="float-right my-3">
 
                     <form onSubmit={handleSubmit}>
-                        <Button type='submit' label={submitButtonLabel} id="submitButton" value="submit"
+                        <Button type='submit' label={submitButtonLabel} name="submitButton" id="submitButton" value="submit"
                             severity="success" icon={submitButtonIcon} />
                     </form>
                 </div>
