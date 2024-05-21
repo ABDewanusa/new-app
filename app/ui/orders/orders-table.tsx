@@ -270,8 +270,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
             <Dialog visible={orderDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={create ? "Create Order" : "Edit Order"} modal className="p-fluid" onHide={hideDialog}>
 
                 <div className='mb-2'>
-                    <p>{JSON.stringify(order)}</p>
-                    <p>{JSON.stringify(productQuantity)}</p>
+
                     <label htmlFor='Customer'>Pemesan:</label>
                     <Dropdown name='customer' inputId='Customer' value={order.customer}
                         onChange={(e) => setOrder({ ...order, customer: e.value })}
