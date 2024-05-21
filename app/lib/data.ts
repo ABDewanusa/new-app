@@ -33,7 +33,7 @@ export async function fetchOrders() {
             },
             status: o.orderStatus.status,
             payment: o.isPaid ? "Paid" : "Not Paid",
-            orderlist: o.orderlist.map((op) => ({ product_id: op.product?.id || "?", product_name: op.product?.name || "?", quantity: op.quantity || 0, })),
+            orderlist: o.orderlist.map((op) => ({ productId: op.product?.id || "?", productName: op.product?.name || "?", quantity: op.quantity || 0, })),
             orderedAt: o.orderedAt || new Date(),
             deliveryAt: o.deliveryAt || new Date()
         }))
@@ -63,7 +63,7 @@ export async function fetchProducts() {
 
         const formatted = res.map((p) => ({
             id: p.id,
-            product_name: p.name || "?"
+            productName: p.name || "?"
         }))
 
         console.log('Data fetch completed.');

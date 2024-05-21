@@ -11,6 +11,7 @@ import { Toolbar } from 'primereact/toolbar';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
+import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
 import { Toast } from 'primereact/toast';
 import { formatDateTime, formatDate } from "@/app/lib/utils"
 import 'primeicons/primeicons.css';
@@ -19,7 +20,7 @@ import { createOrder, deleteOrder, updateOrder } from '@/app/lib/action'
 import {
     fetchOrders,
 } from "@/app/lib/data"
-import { json } from 'stream/consumers';
+
 
 const requestOrders = async () => {
     return await fetchOrders()
@@ -39,7 +40,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
             id: "",
             name: ""
         },
-        status: "",
+        status: "Queued",
         payment: "",
         orderlist: [],
         orderedAt: defaultOrderDate,
@@ -48,16 +49,16 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
 
     let emptyProduct: Product = {
         id: "",
-        product_name: ""
+        productName: ""
     };
 
-    const [orders, setOrders] = useState<Order[]>(initOrders)
+    const [orders, setOrders] = useState<Order[]>(initOrders);
     const [orderDialog, setOrderDialog] = useState<boolean>(false);
     const [order, setOrder] = useState<Order>(emptyOrder);
-    const [product, setProduct] = useState<Product>(emptyProduct)
-    const [productQuantity, setProductQuantity] = useState<number>(0)
-    const [create, setCreate] = useState<Boolean>(false)
-
+    const [prevOrder, setPrevOrder] = useState<Order>(emptyOrder);
+    const [product, setProduct] = useState<Product>(emptyProduct);
+    const [productQuantity, setProductQuantity] = useState<number>(0);
+    const [create, setCreate] = useState<boolean>(false);
 
 
 
@@ -76,7 +77,8 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
     };
 
     const openEdit = (order: Order) => {
-        setOrder({ ...order });
+        setOrder(order);
+        setPrevOrder(order);
         setCreate(false)
         setOrderDialog(true);
     };
@@ -84,8 +86,8 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
     const rightToolbarTemplate = () => {
         return (
             <div className="flex flex-wrap gap-2">
-                <Button label="New Order" icon="pi pi-plus" severity="success" onClick={openNew} />
-                {/* <Button className="" severity="success" icon="pi pi-plus" onClick={toastOrderProductExist}></Button> */}
+                <Button label="New Order" icon="pi pi-plus" onClick={openNew} />
+
             </div>
         );
     };
@@ -113,7 +115,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
             <>
                 {rowData.orderlist.map((a) => {
                     return (
-                        <p key={a.product_id.toString()}><i className="pi pi-at" style={{ fontSize: '0.75rem' }}></i> {a.quantity.toString()} x {a.product_name}</p>
+                        <p key={a.productId.toString()}><i className="pi pi-at" style={{ fontSize: '0.75rem' }}></i> {a.quantity.toString()} x {a.productName}</p>
                     )
                 })}
             </>
@@ -121,7 +123,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
     }
 
     const orderDateBodyTemplate = (rowData: Order) => {
-        return rowData.orderedAt ? formatDate(rowData.orderedAt) : "?"
+        return rowData.deliveryAt ? formatDate(rowData.deliveryAt) : "?"
     }
 
     const toast = useRef<Toast>(null);
@@ -138,32 +140,30 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
     }
 
     const addOrderProduct = () => {
-        if (order.customer.id) {
-            if (product.id && productQuantity > 0) {
-                const isExist = order.orderlist.reduce((acc, o) => {
-                    return acc || Object.values(o).includes(product.id)
-                }, false);
 
-                if (!isExist) {
+        if (product.id && productQuantity > 0) {
+            const isExist = order.orderlist.reduce((acc, o) => {
+                return acc || Object.values(o).includes(product.id)
+            }, false);
 
-                    const newOrderList = [...order.orderlist, {
+            if (!isExist) {
 
-                        product_id: product.id,
-                        product_name: product.product_name,
-                        quantity: productQuantity
-                    }]
-                    setOrder({ ...order, orderlist: newOrderList })
-                    // setOrderProducts(newOrderProducts);
+                const newOrderList = [...order.orderlist, {
 
-                } else {
-                    toastOrderProductExist();
-                }
+                    productId: product.id,
+                    productName: product.productName,
+                    quantity: productQuantity
+                }]
+                setOrder({ ...order, orderlist: newOrderList })
+                // setOrderProducts(newOrderProducts);
+
             } else {
-                toastInvalidOrderProduct();
+                toastOrderProductExist();
             }
         } else {
-            toastInvalidCustomer();
+            toastInvalidOrderProduct();
         }
+
     };
 
 
@@ -185,7 +185,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
     };
 
     const deleteOrderProduct = (orderProduct: OrderProduct) => {
-        let removed = order.orderlist.filter(op => op.product_id !== orderProduct.product_id)
+        let removed = order.orderlist.filter(op => op.productId !== orderProduct.productId)
         setOrder({ ...order, orderlist: removed });
     }
 
@@ -206,6 +206,9 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
         toast.current?.show({ severity: 'warn', summary: 'Invalid Orderlist', detail: 'Please add at least one product the order-list.', life: 3000 });
     }
 
+    const toastNoChange = () => {
+        toast.current?.show({ severity: 'warn', summary: 'Invalid update/change', detail: 'There is no change to update.', life: 3000 });
+    }
 
 
     const submitButtonLabel = create ? "Create" : "Update"
@@ -220,12 +223,20 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
                     const feedback = await createOrder(order);
                     toastSubmitFeedback(feedback.message, feedback.severity)
                     setOrders(await requestOrders())
+                    hideDialog()
 
                 } else {
-                    const feedback = await updateOrder(order);
-                    toastSubmitFeedback(feedback.message, feedback.severity)
-                    setOrders(await requestOrders())
+
+                    if (JSON.stringify(order) === JSON.stringify(prevOrder)) {
+                        toastNoChange()
+                    } else {
+                        const feedback = await updateOrder(order, prevOrder);
+                        toastSubmitFeedback(feedback.message, feedback.severity)
+                        setOrders(await requestOrders())
+                        hideDialog()
+                    }
                 }
+
 
 
             } else {
@@ -245,7 +256,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
 
             {/* Orders table */}
             <DataTable value={orders} dataKey="id" tableStyle={{ minWidth: '50rem' }}
-                paginator rows={5}
+                paginator rows={4} sortField='deliveryAt' sortOrder={1}
             >
                 <Column field='deliveryAt' header='Tanggal Kirim' dataType="date" body={orderDateBodyTemplate} style={{ minWidth: '12rem' }} sortable />
                 <Column field='customer.name' header='Pemesan' style={{ minWidth: '10rem' }} />
@@ -271,7 +282,8 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
 
                 <div className='mb-2'>
                     <label htmlFor='OrderedAt'>Tanggal Pesan:</label>
-                    <Calendar name='orderedAt' inputId='OrderedAt' value={order.orderedAt}
+                    <Calendar name='orderedAt' inputId='OrderedAt'
+                        value={order.orderedAt}
                         onChange={(e) => setOrder({ ...order, orderedAt: e.value })}
                     />
                 </div>
@@ -283,32 +295,47 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
                             <InputNumber name='productQuantity' inputId='ProductQuantity' value={productQuantity}
                                 onValueChange={(e: InputNumberValueChangeEvent) => setProductQuantity(e.value ?? 0)}
                                 mode="decimal" showButtons min={0} max={100}
-                                incrementButtonClassName='p-button-success'
-                                decrementButtonClassName='p-button-success'
+
                             />
                         </div>
                         <div className='col mr-3'>
                             <Dropdown name="product" inputId="Product" value={product} onChange={(e) => setProduct(e.value)}
-                                options={products} optionLabel="product_name"
+                                options={products} optionLabel="productName"
                                 placeholder="Select a Product" className="w-full"
                             />
                         </div>
                         <div className="col-fixed float-right mr-3" style={{ "width": "25px" }}>
-                            <Button name='addProductQty' id='addProductQty' className="" severity="success"
+                            <Button name='addProductQty' id='addProductQty' className=""
                                 icon="pi pi-plus" onClick={addOrderProduct}></Button>
                         </div>
                     </div>
                     {order.orderlist.length > 0 && (
                         <div className='card my-3'>
 
-                            <DataTable dataKey="product_id" value={order.orderlist} size='small'>
+                            <DataTable dataKey="productId" value={order.orderlist} size='small'>
                                 <Column field="quantity" header="Qty"></Column>
-                                <Column field="product_name" header="Product"></Column>
+                                <Column field="productName" header="Product"></Column>
                                 <Column body={actionBodyDeleteOrderProduct} style={{ minWidth: '8rem' }}></Column>
                             </DataTable>
                         </div>
                     )}
 
+                </div>
+                <div className='mb-2 flex justify-content-center'>
+                    <div className="flex flex-wrap gap-3">
+                        <div className="flex align-items-center">
+                            <RadioButton inputId="status1" name="queued" value="Queued" onChange={(e: RadioButtonChangeEvent) => setOrder({ ...order, status: e.value })} checked={order.status === "Queued"} />
+                            <label htmlFor="status1" className="ml-2">Queued</label>
+                        </div>
+                        <div className="flex align-items-center">
+                            <RadioButton inputId="status2" name="partially-delivered" value="Partially-Delivered" onChange={(e: RadioButtonChangeEvent) => setOrder({ ...order, status: e.value })} checked={order.status === "Partially-Delivered"} />
+                            <label htmlFor="status2" className="ml-2">Partially-Delivered</label>
+                        </div>
+                        <div className="flex align-items-center">
+                            <RadioButton inputId="status3" name="delivered" value="Delivered" onChange={(e: RadioButtonChangeEvent) => setOrder({ ...order, status: e.value })} checked={order.status === "Delivered"} />
+                            <label htmlFor="status3" className="ml-2">Fully - Delivered</label>
+                        </div>
+                    </div>
                 </div>
                 <div className='mb-2'>
                     <label htmlFor='deliveryAt'>Deadline pengiriman:</label>
@@ -321,7 +348,7 @@ export default function OrdersTable({ initOrders, products, customers }: { initO
 
                     <form onSubmit={handleSubmit}>
                         <Button type='submit' label={submitButtonLabel} name="submitButton" id="submitButton" value="submit"
-                            severity="success" icon={submitButtonIcon} />
+                            icon={submitButtonIcon} />
                     </form>
                 </div>
             </Dialog>
