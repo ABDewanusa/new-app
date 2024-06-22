@@ -1,6 +1,11 @@
-import '@/app/ui/global.css';
+import { PrimeReactProvider } from "primereact/api";
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
+import '@/app/ui/global.css';
+import 'primeicons/primeicons.css';
+import '/node_modules/primeflex/primeflex.css';
+import "primereact/resources/themes/saga-green/theme.css";
+// import 'primereact/resources/themes/lara-light-blue/theme.css'
 
 export const metadata: Metadata = {
   title: {
@@ -16,7 +21,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <PrimeReactProvider>
+        <body className={`${inter.className}`}>
+          {children}
+        </body>
+      </PrimeReactProvider>
     </html>
   );
 }

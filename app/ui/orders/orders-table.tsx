@@ -477,8 +477,6 @@ export default function OrdersTable() {
             accept,
 
         });
-
-
     }
 
     const bodyDetailsDialog = () => {
