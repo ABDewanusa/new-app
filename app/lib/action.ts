@@ -1,8 +1,5 @@
 'use server';
 import prisma from "@/lib/prisma"
-import {
-    formatDate,
-} from "@/app/lib/utils";
 import { FormattedOrderProduct, NewOrder } from '@/app/lib/definitions';
 
 const feedback: {
@@ -10,6 +7,31 @@ const feedback: {
     data: Object,
     severity: "info" | "warn" | "error" | "success"
 } = { message: "<emptyFeedback>", data: {}, severity: "warn" }
+
+export async function deleteOrder(orderId: string) {
+    try {
+        const deleteOrderProducts = prisma.orderProduct.deleteMany({
+            where: {
+                orderId: orderId
+            }
+        })
+        const deleteOrder = prisma.order.delete({
+            where: {
+                id: orderId
+            }
+        })
+
+        const transaction = await prisma.$transaction([deleteOrderProducts, deleteOrder])
+
+        feedback.message = "Order deleted successfully."
+        feedback.severity = "info"
+    } catch {
+        feedback.message = "Failed to delete order."
+        feedback.message += " Changes: " + orderId
+        feedback.severity = "error"
+    }
+    return feedback
+}
 
 export async function createOrder(data: NewOrder) {
     try {
@@ -30,7 +52,6 @@ export async function createOrder(data: NewOrder) {
         })
 
         feedback.message = "New order created successfully."
-        feedback.message += " Changes: " + formatDate(newOrder.updatedAt)
         feedback.severity = "success"
     } catch {
         feedback.message = "Failed to create new order."
@@ -64,7 +85,6 @@ export async function updateOrderList(id: string, newOrderList: FormattedOrderPr
         console.log(transaction)
 
         feedback.message = "Order's list updated successfully."
-        feedback.message += " Changes: " + transaction
         feedback.severity = "success"
 
     } catch {

@@ -11,6 +11,7 @@ import { Calendar } from 'primereact/calendar';
 import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
 import {
     fetchOrders,
@@ -35,7 +36,8 @@ import {
     updateDeliveryDate,
     updateStatus,
     updateOrderList,
-    createOrder
+    createOrder,
+    deleteOrder
 } from '@/app/lib/action'
 
 
@@ -452,14 +454,58 @@ export default function OrdersTable() {
         )
     }
 
+    const accept = async () => {
+        if (selectedOrder) {
+            const feedback = await deleteOrder(selectedOrder.id)
+
+            if (feedback.severity == 'info') {
+                loadOrders()
+            }
+
+            toastFeedback(feedback.message, feedback.severity)
+            closeDetailsDialog()
+        }
+    }
+
+    const confirmDeleteDialog = () => {
+        confirmDialog({
+            message: 'Do you want to delete this record?',
+            header: 'Delete Confirmation',
+            icon: 'pi pi-info-circle',
+            defaultFocus: 'reject',
+            acceptClassName: 'p-button-danger',
+            accept,
+
+        });
+
+
+    }
+
     const bodyDetailsDialog = () => {
         return (
             <div className="grid">
                 <div className="col">
                     {/* <p>{JSON.stringify(selectedOrder)}</p> */}
                     <div className="mb-2">
-                        <p>Pemesan:</p>
-                        <p className="font-medium">{selectedOrder?.customer.name}</p>
+                        <div className="grid">
+                            <div className="col">
+                                <p>Pemesan:</p>
+                                <p className="font-medium">{selectedOrder?.customer.name}</p>
+                            </div>
+                            <div className="col">
+                                <div className="flex justify-content-end flex-wrap">
+                                    <div className="flex mt-1 w-6rem align-items-baseline justify-content-center ">
+                                        <Button
+                                            className="justify-content-center shadow-5"
+                                            severity='danger'
+                                            onClick={confirmDeleteDialog}
+                                        ><i className='pi pi-trash'></i>
+                                            &nbsp;Hapus</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     <div className="mb-2">
                         <p>Tanggal Pesan:</p>
@@ -501,7 +547,7 @@ export default function OrdersTable() {
                                         setNewOrderList(selectedOrder ? selectedOrder.orderlist : []);
                                     }}
                                     className="flex-end w-3 align-items-center justify-content-center py-1"
-                                >Ubah</Button>
+                                ><i className='pi pi-pen-to-square'></i>&nbsp;Ubah</Button>
                             )}
                             {editOrderProduct && editOrderListButtons()}
                         </div>
@@ -596,6 +642,7 @@ export default function OrdersTable() {
                 visible={detailsDialog} header={"Order Details"} onHide={closeDetailsDialog}>
                 {bodyDetailsDialog()}
             </Dialog>
+            <ConfirmDialog />
             <Dialog modal className="p-fluid" style={{ width: '380px' }}
                 visible={createDialog} header={"Create Order"} onHide={closeCreateDialog}>
                 {bodyCreateDialog()}
