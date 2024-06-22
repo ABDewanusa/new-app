@@ -1,6 +1,31 @@
 import { Nullable } from "primereact/ts-helpers"
 
 export type Order = {
+    id: string,
+    orderedAt: Date,
+    deliveryAt: Date,
+    isPaid: boolean,
+    orderStatus: { status: string },
+    customer: { id: string, name: string },
+    orderlist: OrderProduct[],
+}
+
+
+export type OrderProduct = {
+    quantity: number,
+    product: { id: string, name: string }
+}
+
+export type NewOrder = {
+    orderedAt: Date,
+    deliveryAt: Date,
+    // isPaid: boolean,
+    orderStatus: string,
+    customer: { id: string, name: string },
+    orderlist: FormattedOrderProduct[],
+}
+
+export type FormattedOrder = {
     'id': string,
     'customer': {
         'id': string,
@@ -8,19 +33,19 @@ export type Order = {
     }
     'status': string,
     'payment': string,
-    'orderlist': OrderProduct[],
-    'orderedAt': Nullable<Date>,
-    'deliveryAt': Nullable<Date>
+    'orderlist': FormattedOrderProduct[],
+    'orderedAt': Date,
+    'deliveryAt': Date
 }
 
-export type OrderProduct = {
+export type FormattedOrderProduct = {
     'productId': string,
     'productName': string,
     'quantity': number
 }
 export type Product = {
     'id': string,
-    'productName': string
+    'name': string
 }
 
 export type Customer = {

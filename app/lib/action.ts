@@ -1,144 +1,125 @@
 'use server';
 import prisma from "@/lib/prisma"
-import { Order } from "@/app/lib/definitions"
+import {
+    formatDate,
+} from "@/app/lib/utils";
+import { FormattedOrderProduct, NewOrder } from '@/app/lib/definitions';
 
+const feedback: {
+    message: String,
+    data: Object,
+    severity: "info" | "warn" | "error" | "success"
+} = { message: "<emptyFeedback>", data: {}, severity: "warn" }
 
-
-export async function deleteOrder(id: String) {
-    const feedback: {
-        message: String,
-        data: Object,
-        severity: "info" | "warn" | "error" | "success"
-    } = { message: "", data: {}, severity: "info" }
-
+export async function createOrder(data: NewOrder) {
     try {
-        const deleteOrderProduct = prisma.orderProduct.deleteMany({
-            where: { orderId: id.toString() }
-        })
-        const deleteOrder = prisma.order.delete({
-            where: { id: id.toString() }
-        })
+        const statId = { 'Queued': 1, 'Partially-Delivered': 2, 'Delivered': 3 }
 
-        const deepDeleteOrder = await prisma.$transaction([deleteOrderProduct, deleteOrder])
-        console.log(deepDeleteOrder)
-
-        feedback.message = "Order deleted successfully."
-        feedback.severity = "info"
-    } catch {
-        feedback.message = "Failed to delete order."
-        feedback.severity = "error"
-    }
-
-    return feedback
-
-
-}
-
-export async function updateOrder(data: Order, prevData: Order) {
-    const feedback: {
-        message: String,
-        data: Object,
-        severity: "info" | "warn" | "error" | "success"
-    } = { message: "", data: {}, severity: "info" }
-
-    const compare = (acc: any, key: keyof Order) => {
-        if (JSON.stringify(data[key]) === JSON.stringify(prevData[key])) return acc
-        else return { ...acc, [key]: data[key] }
-    }
-
-    const format = (acc: any, key: keyof Order) => {
-        if (key === "status") {
-            const statId = { 'Queued': 1, 'Partially-Delivered': 2, 'Delivered': 3 }
-            return { ...acc, orderStatus: { connect: { id: statId[changes.status as keyof typeof statId] } } }
-        } else if (key === "customer") {
-            return { ...acc, customer: { connect: { id: changes.customer.id } } }
-        } else if (key === "orderlist") {
-            return { ...acc, orderlist: { createMany: { data: changes.orderlist.map((o: any) => ({ quantity: o.quantity, productId: o.productId })) } } }
-        } else {
-            return { ...acc, [key]: changes[key] }
-        }
-    }
-
-    const changes = Object.keys(data).reduce((acc: any, key: any) => compare(acc, key), {})
-    const formatted = Object.keys(changes).reduce((acc: any, key: any) => format(acc, key), {})
-
-    const deleteOrderProduct = prisma.orderProduct.deleteMany({
-        where: { orderId: data.id }
-    })
-
-    const updateOrder = prisma.order.update({
-        where: { id: data.id },
-        data: formatted
-    })
-
-
-    try {
-
-        if (JSON.stringify(changes) == "{}") {
-            console.log("Nothing changes.")
-            console.log(changes)
-        }
-        else if (Object.keys(changes).includes('orderlist')) {
-            console.log(changes)
-            const transaction = await prisma.$transaction([deleteOrderProduct, updateOrder])
-            console.log(transaction)
-        } else {
-            console.log(changes)
-            const transaction = await prisma.$transaction([updateOrder])
-            console.log(transaction)
-        }
-
-        feedback.message = "Order updated successfully."
-        feedback.severity = "info"
-    } catch {
-        feedback.message = "Failed to update order."
-        feedback.severity = "error"
-    }
-    return feedback
-
-}
-
-export async function createOrder(data: Order) {
-    const feedback: {
-        message: String,
-        data: Object,
-        severity: "info" | "warn" | "error" | "success"
-    } = { message: "", data: {}, severity: "info" }
-
-    const statusId = () => {
-        if (data.status === "Delivered") {
-            return 3
-        } else if (data.status === "Partially-Delivered") {
-            return 2
-        } else {
-            return 1
-        }
-    }
-    const formatted = {
-        customer: { connect: { id: data.customer.id } },
-        orderlist: {
-            createMany: {
-                data: data.orderlist.map((o) => ({ quantity: o.quantity, productId: o.productId }))
+        const newOrder = await prisma.order.create({
+            data: {
+                customer: { connect: { id: data.customer.id } },
+                orderlist: {
+                    createMany: {
+                        data: data.orderlist.map((o) => ({ quantity: o.quantity, productId: o.productId }))
+                    }
+                },
+                orderStatus: { connect: { id: statId[data.orderStatus as keyof typeof statId] } },
+                orderedAt: data.orderedAt,
+                deliveryAt: data.deliveryAt
             }
-        },
-        orderStatus: { connect: { id: statusId() } },
-        orderedAt: data.orderedAt ?? undefined,
-        deliveryAt: data.deliveryAt ?? undefined
-    }
-
-    try {
-        const createOrder = await prisma.order.create({
-            data: formatted
         })
 
-        feedback.message = "Order added successfully."
-        feedback.severity = "info"
-
+        feedback.message = "New order created successfully."
+        feedback.message += " Changes: " + formatDate(newOrder.updatedAt)
+        feedback.severity = "success"
     } catch {
-        feedback.message = "Failed to add order."
+        feedback.message = "Failed to create new order."
         feedback.severity = "error"
     }
 
     return feedback
+}
 
+export async function updateOrderList(id: string, newOrderList: FormattedOrderProduct[]) {
+
+    try {
+        const formatted = newOrderList.map((o: any) => ({ quantity: o.quantity, productId: o.productId }))
+
+        const deleteOrderProduct = prisma.orderProduct.deleteMany({
+            where: { orderId: id }
+        })
+
+        const updateOrder = prisma.order.update({
+            where: { id: id },
+            data: {
+                orderlist: {
+                    createMany: {
+                        data: formatted
+                    }
+                }
+            }
+        })
+
+        const transaction = await prisma.$transaction([deleteOrderProduct, updateOrder])
+        console.log(transaction)
+
+        feedback.message = "Order's list updated successfully."
+        feedback.message += " Changes: " + transaction
+        feedback.severity = "success"
+
+    } catch {
+        feedback.message = "Failed to update order's list."
+        feedback.severity = "error"
+    }
+
+    return feedback
+}
+
+export async function updateStatus(id: string, status: string) {
+    const statId = { 'Queued': 1, 'Partially-Delivered': 2, 'Delivered': 3 }
+
+    try {
+        const updateOrder = await prisma.order.update({
+            where: { id: id },
+            data: {
+                orderStatus: { connect: { id: statId[status as keyof typeof statId] } }
+            }
+        })
+
+        console.log(updateOrder)
+
+        feedback.message = "Order's status updated successfully."
+        feedback.message += " Changes: " + status
+        feedback.severity = "success"
+
+    } catch {
+        feedback.message = "Failed to update order's status."
+        feedback.severity = "error"
+    }
+
+    return feedback
+}
+
+export async function updateDeliveryDate(id: string, newDate: Date) {
+
+    try {
+        const updateOrder = await prisma.order.update({
+            where: { id: id },
+            data: {
+                deliveryAt: newDate
+            }
+        })
+
+        console.log(updateOrder)
+
+        feedback.message = "Order's delivery-date updated successfully."
+        feedback.message += " Changes: " + newDate.toDateString()
+        feedback.severity = "success"
+
+    } catch {
+        feedback.message = "Failed to update order's delivery-date."
+        feedback.severity = "error"
+    }
+
+    return feedback
 }

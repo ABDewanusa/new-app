@@ -17,7 +17,6 @@ export async function fetchOrders() {
                 deliveryAt: true,
                 isPaid: true,
                 orderStatus: { select: { status: true } },
-                // orderStatus: true,
                 customer: { select: { id: true, name: true } },
                 orderlist: { select: { quantity: true, product: { select: { id: true, name: true, } } } },
 
@@ -25,24 +24,9 @@ export async function fetchOrders() {
         })
 
         // console.log(res)
-        const formatted = res.map((o) => ({
-            id: o.id,
-            customer: {
-                id: o.customer?.id || "?",
-                name: o.customer?.name || "?",
-            },
-            status: o.orderStatus.status,
-            payment: o.isPaid ? "Paid" : "Not Paid",
-            orderlist: o.orderlist.map((op) => ({ productId: op.product?.id || "?", productName: op.product?.name || "?", quantity: op.quantity || 0, })),
-            orderedAt: o.orderedAt || new Date(),
-            deliveryAt: o.deliveryAt || new Date()
-        }))
-
-        // console.log(formatted)
-
         console.log('Data fetch completed.');
 
-        return formatted
+        return res
 
     } catch (error) {
         console.error('Database Error:', error);
@@ -61,13 +45,10 @@ export async function fetchProducts() {
             }
         })
 
-        const formatted = res.map((p) => ({
-            id: p.id,
-            productName: p.name || "?"
-        }))
+
 
         console.log('Data fetch completed.');
-        return formatted
+        return res
 
     } catch (error) {
         console.error('Database Error:', error);
@@ -86,14 +67,8 @@ export async function fetchCustomers() {
                 name: true
             }
         })
-
-        const formatted = res.map((c) => ({
-            id: c.id,
-            name: c.name || "?"
-        }))
-
         console.log('Data fetch completed.');
-        return formatted
+        return res
 
     } catch (error) {
         console.error('Database Error:', error);
