@@ -21,7 +21,7 @@ export default function MakeRecipe() {
             <div>
                 <p className='font-medium'>
                     {
-                        orderlist.map(a => a.map(b => <p>{b.productName}</p>))
+                        orderlist.map(a => a.map(b => <p key={b.productId}>{b.productName}</p>))
                     }
                 </p>
             </div>

@@ -1,5 +1,6 @@
 import { Menubar } from 'primereact/menubar';
 import { Avatar } from 'primereact/avatar';
+import Image from 'next/image';
 
 export default function NavBar() {
     const items = [
@@ -38,7 +39,7 @@ export default function NavBar() {
 
     const start = (
         <div>
-            <img alt="logo" src="https://primefaces.org/cdn/primereact/images/logo.png"></img>
+            <Image alt="logo" src="https://primefaces.org/cdn/primereact/images/logo.png" />
         </div>
     );
     const end = (
