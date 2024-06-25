@@ -1,8 +1,6 @@
 import { Metadata } from "next";
-import { Card } from 'primereact/card';
-import { Button } from "primereact/button";
 import OrdersTable from "@/app/ui/orders/orders-table";
-
+import Link from 'next/link';
 
 export const metadata: Metadata = {
     title: "Orders",
@@ -19,7 +17,7 @@ export default async function Page() {
                         <p className="text-2xl font-medium">Daftar Pesanan</p>
                     </div>
                     <div className="col flex justify-content-end align-items-center flex-wrap ">
-                        <Button className='font-medium' size='small' rounded raised icon="pi pi-file-export">&nbsp;Buat Resep</Button>
+                        <Link href="/dashboard/production-planning" className='p-button font-medium text-xs py-2 px-3 rounded-full shadow-lg' rel="noopener noreferrer"><i className="pi pi-file-export"></i>&nbsp;Buat Resep</Link>
                     </div>
                 </div>
             </div>
