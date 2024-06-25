@@ -1,4 +1,4 @@
-import { PrimeReactProvider } from "primereact/api";
+
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
 import '@/app/ui/global.css';
@@ -21,11 +21,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <PrimeReactProvider>
-        <body className={`${inter.className}`}>
-          {children}
-        </body>
-      </PrimeReactProvider>
+
+      <body className={`${inter.className}`}>
+        {children}
+      </body>
+
     </html>
   );
 }

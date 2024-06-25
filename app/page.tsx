@@ -6,18 +6,6 @@ import { lusitana } from '@/app/ui/fonts';
 
 export default function Home() {
   return (
-    // <main className='min-h-screen min-w-screen bg-teal-500'>
-    //   <div className="flex">
-    //     <Card className='m-10 shadow-5'>
-    //       <a href="/dashboard" className=" p-button">
-    //         <p className='font-medium'>
-    //           Dashboard
-    //         </p>
-    //       </a>
-
-    //     </Card>
-    //   </div>
-    // </main >
     <main className="flex min-h-screen flex-col p-6 bg-green-50">
       <div className="flex h-20 shrink-0 items-end rounded-lg bg-green-500 p-4 md:h-52">
         <p className='font-bold text-5xl text-teal-50'>e-Bakery</p>

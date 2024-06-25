@@ -12,6 +12,7 @@ import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Divider } from 'primereact/divider';
 
 import {
     fetchOrders,
@@ -39,8 +40,6 @@ import {
     createOrder,
     deleteOrder
 } from '@/app/lib/action'
-
-
 
 export default function OrdersTable() {
     let defaultOrderDate = new Date();
@@ -117,24 +116,20 @@ export default function OrdersTable() {
     const tableHeader = () => {
         return (
             <div className="grid">
-                <div className="col flex justify-content-start flex-wrap">
-                    <div className="flex align-items-center justify-content-center">
-                        <p className="text-2xl w-10">Orders</p>
-                    </div>
-                </div>
-                <div className="col flex justify-content-end flex-wrap">
-                    <div className="grid">
-                        <div className="col flex align-items-center justify-content-center m-0 p-0">
-                            <label htmlFor="filter">all orders&nbsp;</label>
-                            <InputSwitch inputId="filter" checked={showAll} onChange={(e) => setShowAll(e.value)} />
 
+                <div className="col flex justify-content-end flex-wrap">
+                    <div className="grid my-1 mr-1">
+                        <div className="col flex align-items-center justify-content-center mr-1 mt-1 p-0">
+                            <label htmlFor="filter">Semua&nbsp;</label>
+                            <InputSwitch inputId="filter" checked={showAll} onChange={(e) => setShowAll(e.value)} />
                         </div>
                         <div className="col flex align-items-center justify-content-center m-0 p-0">
-                            <Button onClick={loadOrders} size='small' rounded text raised><i className="pi pi-refresh" style={{ fontSize: '1rem' }}></i></Button>
+                            <Button className="max-w-11" onClick={loadOrders} size='small' rounded text raised icon="pi pi-refresh"></Button>
                         </div>
-                        <div className="col flex align-items-center justify-content-center m-0 p-0">
-                            <Button onClick={openCreateDialog} severity="info" size='small' rounded text raised><i className="pi pi-plus" style={{ fontSize: '1rem' }}></i></Button>
+                        <div className="col flex align-items-center justify-content-center ml-1 p-0">
+                            <Button className="max-w-11" onClick={openCreateDialog} severity="info" size='small' rounded text raised icon="pi pi-plus"></Button>
                         </div>
+
                     </div>
 
                 </div>
@@ -532,9 +527,6 @@ export default function OrdersTable() {
                     <div className="mb-2">
                         <p>Rincian Pesanan:</p>
                         {editOrderProduct && formAddOrderProduct()}
-
-                        {orderListTable()}
-
                         <div className="flex justify-content-end">
                             {editOrderProduct == false && (
                                 <Button
@@ -544,13 +536,30 @@ export default function OrdersTable() {
                                         setEditStatus(false);
                                         setNewOrderList(selectedOrder ? selectedOrder.orderlist : []);
                                     }}
-                                    className="flex-end w-3 align-items-center justify-content-center py-1"
+                                    raised
+                                    className="flex-end w-3 align-items-center justify-content-center py-1 mb-2"
                                 ><i className='pi pi-pen-to-square'></i>&nbsp;Ubah</Button>
                             )}
+
+                        </div>
+                        {orderListTable()}
+                        <div className="flex justify-content-end">
                             {editOrderProduct && editOrderListButtons()}
                         </div>
                     </div>
+                    <Divider />
+                    <div className="">
+                        <div className="grid">
+                            <div className="col">
+                                <div className="flex align-items-center justify-content-center">
+                                    <Button className='font-medium w-8rem justify-content-center' severity='info' onClick={loadOrders} size='small' raised icon="pi pi-file-export">&nbsp;Buat Resep</Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <Divider />
                 </div>
+
             </div>
         )
     }
