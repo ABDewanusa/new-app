@@ -45,7 +45,9 @@ export type FormattedOrderProduct = {
 }
 export type Product = {
     'id': string,
-    'name': string
+    'name': string,
+    'gramPerUnit': number,
+    'unitPerPack': number
 }
 
 export type Customer = {

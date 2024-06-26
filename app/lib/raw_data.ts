@@ -41,7 +41,9 @@ export async function fetchProducts() {
         const res = await prisma.product.findMany({
             select: {
                 id: true,
-                name: true
+                name: true,
+                gramPerUnit: true,
+                unitPerPack: true
             }
         })
 

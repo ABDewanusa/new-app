@@ -68,9 +68,9 @@ export default function QueueTable(
 
     }
 
-    const tableHeader = () => {
+    const TableHeader = () => {
         return (
-            <div className="flex justify-content-end flex-wrap mr-1 my-1">
+            <div className="flex justify-content-end flex-wrap mr-1 mb-2 ">
                 <div className="flex align-items-center justify-content-center m-0 p-0">
                     <Button onClick={loadOrders} size='small' rounded raised icon="pi pi-refresh"></Button>
                 </div>
@@ -84,14 +84,15 @@ export default function QueueTable(
     return (
         <div>
             <Toast ref={toast} />
+            <TableHeader />
             <DataTable
+                className='w-20rem'
                 size='small'
-                scrollable scrollHeight='250px'
+                scrollable scrollHeight='300px'
                 value={queuedOrders} dataKey="id"
-                header={tableHeader}
+                // header={tableHeader}
                 selectionMode='multiple' selection={selectedOrders!}
                 onSelectionChange={(e) => setSelectedOrders(e.value)}
-
                 sortField='deliveryAt' sortOrder={1}
             >
                 <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>

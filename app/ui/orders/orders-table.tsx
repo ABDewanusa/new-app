@@ -356,23 +356,23 @@ export default function OrdersTable() {
         if (product) {
             if (product.id && productQuantity > 0) {
 
-                const isExist = newOrderList.reduce((acc, o) => {
-                    return acc || Object.values(o).includes(product.id)
-                }, false);
+                // const isExist = newOrderList.reduce((acc, o) => {
+                //     return acc || Object.values(o).includes(product.id)
+                // }, false);
 
-                if (!isExist) {
-                    let added = [...newOrderList, {
-                        productId: product.id,
-                        productName: product.name,
-                        quantity: productQuantity
-                    }]
+                // if (!isExist) {
+                let added = [...newOrderList, {
+                    productId: product.id,
+                    productName: product.name,
+                    quantity: productQuantity
+                }]
 
-                    setNewOrderList(added)
+                setNewOrderList(added)
 
-                } else {
-                    // toastFeedback("That product has already exist. Remove the existing product first, before adding the same product.", "warn")
-                    toastFeedback("Produk tersebut sudah ada. Hapus produk tersebut dari daftar sebelum menambahkan produk yang sama.", "warn")
-                }
+                // } else {
+                //     // toastFeedback("That product has already exist. Remove the existing product first, before adding the same product.", "warn")
+                //     toastFeedback("Produk tersebut sudah ada. Hapus produk tersebut dari daftar sebelum menambahkan produk yang sama.", "warn")
+                // }
 
 
             } else {
