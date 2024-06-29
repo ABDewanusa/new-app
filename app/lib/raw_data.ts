@@ -18,7 +18,7 @@ export async function fetchOrders() {
                 isPaid: true,
                 orderStatus: { select: { status: true } },
                 customer: { select: { id: true, name: true } },
-                orderlist: { select: { quantity: true, product: { select: { id: true, name: true, } } } },
+                orderlist: { select: { id: true, quantity: true, product: { select: { id: true, name: true, } } } },
 
             }
         })

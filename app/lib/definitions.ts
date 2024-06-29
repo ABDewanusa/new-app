@@ -12,6 +12,7 @@ export type Order = {
 
 
 export type OrderProduct = {
+    id: string,
     quantity: number,
     product: { id: string, name: string }
 }
@@ -53,4 +54,14 @@ export type Product = {
 export type Customer = {
     'id': string,
     'name': string
+}
+
+export type OrderItem = {
+    "id": string,
+    "productId": string,
+    "productName": string,
+    "quantity": number,
+    "customer_id": string,
+    "customer_name": string,
+    "order_id": string
 }

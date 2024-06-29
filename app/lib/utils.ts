@@ -1,4 +1,8 @@
-import { Order } from '@/app/lib/definitions';
+import {
+    Order,
+    FormattedOrder,
+    OrderItem
+} from '@/app/lib/definitions';
 
 export const formatDateTime = (
     date: Date
@@ -21,8 +25,7 @@ export const formatDate = (
 
 }
 
-export async function formatOrders(res: Order[]) {
-    'use client'
+export function formatOrders(res: Order[]) {
     const formatted = res.map((o) => ({
         id: o.id,
         customer: {
@@ -31,10 +34,26 @@ export async function formatOrders(res: Order[]) {
         },
         status: o.orderStatus.status,
         payment: o.isPaid ? "Paid" : "Not Paid",
-        orderlist: o.orderlist.map((op) => ({ productId: op.product?.id || "?", productName: op.product?.name || "?", quantity: op.quantity || 0, })),
+        orderlist: o.orderlist.map((op) => ({ id: op.id, productId: op.product?.id || "?", productName: op.product?.name || "?", quantity: op.quantity || 0, })),
         orderedAt: o.orderedAt || new Date(),
         deliveryAt: o.deliveryAt || new Date()
     }))
+
+    return formatted
+}
+
+export function getOrderList(orders: Order[]): Array<OrderItem> {
+    const formatted = orders.flatMap(order =>
+        order.orderlist.map(item => ({
+            id: item.id,
+            productId: item.product.id,
+            productName: item.product.name,
+            quantity: item.quantity,
+            customer_id: order.customer.id,
+            customer_name: order.customer.name,
+            order_id: order.id
+        }))
+    );
 
     return formatted
 }

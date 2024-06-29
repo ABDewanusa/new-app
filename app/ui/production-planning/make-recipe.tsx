@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import {
     FormattedOrder,
-    Product
+    Product,
+    OrderItem
 } from '@/app/lib/definitions';
 import {
     fetchProducts,
@@ -14,25 +15,24 @@ import { Divider } from 'primereact/divider';
 
 export default function MakeRecipe() {
 
-    const [selectedOrders, setSelectedOrders] = useState<FormattedOrder[]>([]);
+    const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     useEffect(() => {
         fetchProducts().then((data) => setProducts(data))
     }, []);
 
-    const handleSelectedOrders = (data: FormattedOrder[]): void => {
-        setSelectedOrders(data)
+    const handleSelectedItems = (data: OrderItem[]): void => {
+        setSelectedItems(data)
     }
 
     const RecipeBody = () => {
-        const orderlist = selectedOrders.map((x) => (x.orderlist))
 
         const productMap = products.reduce((map, product) => {
             map[product.id] = { name: product.name, gram: product.gramPerUnit * product.unitPerPack };
             return map;
         }, {} as { [key: string]: { name: string, gram: number } });
 
-        const quantityMap = orderlist.flat().reduce((map, item) => {
+        const quantityMap = selectedItems.flat().reduce((map, item) => {
             if (!map[item.productId]) {
                 map[item.productId] = 0;
             }
@@ -68,12 +68,12 @@ export default function MakeRecipe() {
         return (
             <>
                 <div className="flex flex-column flex-wrap  px-3">
-                    {(orderlist.length > 0) && (
+                    {(selectedItems.length > 0) && (
                         Object.entries(result).map(([id, { name, quantity, gramSubTotal }]) => (
-                            <div className='grid flex flex-wrap grid-nogutter ' key={id}>
-                                <div className='col flex justify-content-start'>{name}</div>
-                                <div className='col-fixed ' style={{ "width": "15px" }}>:</div>
-                                <div className='col-fixed flex justify-content-end font-medium' style={{ "width": "60px" }}>{quantity} pack</div>
+                            <div className='grid flex flex-wrap grid-nogutter' key={id}>
+                                <div className='col-fixed flex justify-content-start' style={{ "width": "190px" }}>{name}</div>
+                                <div className='col-fixed ' style={{ "width": "10px" }}>&nbsp;:</div>
+                                <div className='col-fixed flex justify-content-end font-medium' style={{ "width": "55px" }}>{quantity}</div>
                                 <div className='col-fixed flex justify-content-end ' style={{ "width": "100px" }}>&nbsp; ({gramSubTotal} gram)</div>
                             </div>
                         ))
@@ -81,7 +81,7 @@ export default function MakeRecipe() {
                     }
                 </div>
                 <div className="flex justify-content-end flex-wrap ">
-                    {(orderlist.length > 1) && (
+                    {(Object.keys(quantityMap).length > 1) && (
 
                         <div className="flex justify-content-center w-6rem border-top-2 border-black-alpha-40 mr-2">
                             {totalGrams} gram
@@ -91,7 +91,7 @@ export default function MakeRecipe() {
 
                 <Divider />
                 <div className="flex flex-column flex-wrap px-8">
-                    {(orderlist.length > 0) && (
+                    {(selectedItems.length > 0) && (
                         Object.entries(recipe).map(([ingredient, amount]) => (
                             <div className='grid flex flex-wrap grid-nogutter ' key={ingredient}>
                                 <div className='col flex justify-content-start'>{ingredient}</div>
@@ -105,24 +105,20 @@ export default function MakeRecipe() {
 
 
                 </div>
-                <Divider />
-                {/* <p>{JSON.stringify(quantityMap)}</p> */}
+
             </>
         )
     }
     return (
         <div className="flex justify-content-center flex-wrap max-w-full">
 
-            <Card className="flex my-2 mr-2 shadow-6 bg-green-50 w-23rem">
-
+            <Card className="flex justify-content-center my-2 lg:mr-2 shadow-6 bg-green-50 w-26rem">
                 <QueueTable
-                    handleSelectedOrders={handleSelectedOrders}
+                    handleSelectedItems={handleSelectedItems}
                 />
-
-
             </Card>
 
-            <Card className="my-2 ml-2 shadow-6 bg-red-50 w-max-23rem">
+            <Card className="my-2 lg:ml-2 shadow-6 bg-red-50 w-max-">
                 <div className="flex justify-content-center flex-wrap">
                     <p className='flex justify-content-center text-xl font-medium mb-2'>Kartu Rencana Produksi</p>
                 </div>
