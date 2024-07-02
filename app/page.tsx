@@ -19,7 +19,7 @@ export default function Home() {
           </p>
           <div className="flex xl:justify-start md:justify-center sm:justify-center">
             <Link
-              href="/login"
+              href="/auth/login"
               className="flex items-center gap-5 self-start rounded-lg bg-green-500 shadow-8 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 md:text-base"
             >
               <span>Log In</span> <ArrowRightIcon className="w-5 md:w-6" />
