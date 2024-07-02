@@ -1,3 +1,5 @@
+import seedUserData from "./seedUserData.json" with {type: "json"}
+
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
@@ -17,45 +19,15 @@ async function main() {
         skipDuplicates: true,
     })
 
-    const passGandalf = await bcrypt.hash("YouShallNotPass!", 5);
-    const passFrodo = await bcrypt.hash("IWillTakeIt!", 5);
-    const passAragorn = await bcrypt.hash("YouHaveMySword!", 5);
-    const passLegolas = await bcrypt.hash("AndYouHaveMyBow!", 5);
-    const passGimli = await bcrypt.hash("AndMyAxe!", 5);
+    const userData = seedUserData.map(async (u) => ({
+        name: u.name,
+        email: u.email,
+        password: await bcrypt.hash(u.password, 5),
+        roleId: u.roleId
+    }))
 
     const user = await prisma.user.createMany({
-        data: [
-            {
-                name: "Gandalf",
-                email: "Gandalf@88bakery.com",
-                password: passGandalf,
-                roleId: 1
-            },
-            {
-                name: "Frodo",
-                email: "Frodo@88bakery.com",
-                password: passFrodo,
-                roleId: 2
-            },
-            {
-                name: "Aragorn",
-                email: "Aragorn@88bakery.com",
-                password: passAragorn,
-                roleId: 3
-            },
-            {
-                name: "Legolas",
-                email: "Legolas@88bakery.com",
-                password: passLegolas,
-                roleId: 3
-            },
-            {
-                name: "Gimli",
-                email: "Gimli@88bakery.com",
-                password: passGimli,
-                roleId: 3
-            },
-        ],
+        data: userData,
         skipDuplicates: true,
     })
 

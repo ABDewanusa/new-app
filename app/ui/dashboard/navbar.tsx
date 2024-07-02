@@ -1,6 +1,9 @@
+"use client"
 import { Menubar } from 'primereact/menubar';
 import { Avatar } from 'primereact/avatar';
 import Image from 'next/image';
+import { logOut } from '@/app/lib/action';
+// import { signOut } from '@/auth'
 
 export default function NavBar() {
     const items = [
@@ -34,7 +37,15 @@ export default function NavBar() {
                     url: "/dashboard/production-logs"
                 },
             ]
-        }
+        },
+        {
+            label: 'Log Out',
+            icon: 'pi pi-sign-out',
+            command: () => {
+                logOut();
+            }
+
+        },
     ];
 
     const start = (

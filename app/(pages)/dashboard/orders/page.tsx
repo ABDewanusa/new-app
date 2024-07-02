@@ -17,7 +17,8 @@ export default async function Page() {
                         <p className="text-2xl font-medium">Daftar Pesanan</p>
                     </div>
                     <div className="col flex justify-content-end align-items-center flex-wrap ">
-                        <Link href="/dashboard/production-planning" className='p-button font-medium text-xs py-2 px-3 rounded-full shadow-lg' rel="noopener noreferrer"><i className="pi pi-file-export"></i>&nbsp;Buat Resep</Link>
+                        <Link href="/dashboard/production-planning" className='p-button p-button-info text-md py-2 px-3 rounded-full shadow-lg'
+                            rel="noopener noreferrer">Buat Resep&nbsp;<i className="pi pi-file-export"></i></Link>
                     </div>
                 </div>
             </div>

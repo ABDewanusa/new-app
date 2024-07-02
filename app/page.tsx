@@ -19,6 +19,14 @@ export default function Home() {
           </p>
           <div className="flex xl:justify-start md:justify-center sm:justify-center">
             <Link
+              href="/login"
+              className="flex items-center gap-5 self-start rounded-lg bg-green-500 shadow-8 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 md:text-base"
+            >
+              <span>Log In</span> <ArrowRightIcon className="w-5 md:w-6" />
+            </Link>
+          </div>
+          {/* <div className="flex xl:justify-start md:justify-center sm:justify-center">
+            <Link
               href="/dashboard"
               className="flex items-center gap-5 self-start rounded-lg bg-green-500 shadow-8 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 md:text-base"
             >
@@ -33,7 +41,7 @@ export default function Home() {
             >
               <span>Orders</span> <ArrowRightIcon className="w-5 md:w-6" />
             </Link>
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
           {/* Add Hero Images Here */}

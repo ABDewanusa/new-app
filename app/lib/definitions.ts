@@ -1,5 +1,13 @@
 import { Nullable } from "primereact/ts-helpers"
 
+export type User = {
+    name: string,
+    email: string,
+    password: string,
+    roleId: number
+
+}
+
 export type Order = {
     id: string,
     orderedAt: Date,
@@ -9,7 +17,6 @@ export type Order = {
     customer: { id: string, name: string },
     orderlist: OrderProduct[],
 }
-
 
 export type OrderProduct = {
     id: string,

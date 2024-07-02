@@ -39,3 +39,9 @@ next-env.d.ts
 
 # sandbox
 /sandbox
+
+# seed
+/prisma/seedUserData.json
+
+#learn
+/app/lib/learn.mjs

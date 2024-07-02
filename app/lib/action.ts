@@ -1,12 +1,23 @@
 'use server';
 import prisma from "@/lib/prisma"
-import { FormattedOrderProduct, NewOrder } from '@/app/lib/definitions';
+import {
+    FormattedOrderProduct,
+    NewOrder
+} from '@/app/lib/definitions';
+
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
+import { signOut } from '@/auth'
+
+
 
 const feedback: {
     message: String,
     data: Object,
     severity: "info" | "warn" | "error" | "success"
-} = { message: "<emptyFeedback>", data: {}, severity: "warn" }
+} = { message: "()", data: {}, severity: "warn" }
+
+
 
 export async function deleteOrder(orderId: string) {
     try {
@@ -142,4 +153,51 @@ export async function updateDeliveryDate(id: string, newDate: Date) {
     }
 
     return feedback
+}
+
+export async function fetchUser(email: string) {
+    try {
+        console.log('Fetching user...');
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email
+            },
+            select: {
+                email: true,
+                password: true,
+                name: true,
+                roleId: true
+            }
+        })
+        console.log('Data fetch completed.');
+        return user
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch user.');
+    }
+
+}
+
+export async function authenticate(
+    prevState: string | undefined,
+    formData: FormData,
+) {
+    try {
+        await signIn('credentials', formData);
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return 'Invalid credentials.';
+                default:
+                    return 'Something went wrong.';
+            }
+        }
+        throw error;
+    }
+}
+
+export async function logOut() {
+    await signOut();
 }
