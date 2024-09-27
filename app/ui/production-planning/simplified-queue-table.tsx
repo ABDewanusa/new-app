@@ -4,7 +4,11 @@ import { DataTable, DataTableSelectEvent } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useState, useEffect, useRef } from 'react';
 import { Toast } from 'primereact/toast';
+import { Dialog } from 'primereact/dialog';
 import { Button } from "primereact/button";
+import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
+import { Dropdown } from 'primereact/dropdown';
+
 import Link from 'next/link';
 import {
     fetchOrders,
@@ -27,29 +31,50 @@ import { format } from 'path';
 
 interface Props {
     handleSelectedItems: (data: OrderItem[]) => void;
+    selectedOrderId: string | undefined;
 }
 
 export default function QueueTable(
-    { handleSelectedItems }: Props
+    { handleSelectedItems, selectedOrderId }: Props
+
 ) {
 
     // const [orders, setOrders] = useState<Order[]>([])
     const [queuedOrders, setQueuedOrders] = useState<Order[]>([]);
     const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
-    const [disable, setDisable] = useState<boolean>(false)
+    const [disable, setDisable] = useState<boolean>(false);
+    const [splitOrderDialogOpen, setSplitOrderDialogOpen] = useState<boolean>(false);
+    const [selectedSplit, setSelectedSplit] = useState<OrderItem | null>()
 
     const toast = useRef<Toast>(null);
     const loadOrders = () => {
         setDisable(true)
         fetchOrders().then((data) => {
             setQueuedOrders([]);
-            clearSelected();
             setTimeout(function () {
                 setQueuedOrders(data.filter(function (el) {
                     return (el.orderStatus.status != "Delivered")
                 }));
                 setDisable(false)
+
+                if (selectedOrderId) {
+                    const selectedOrder = (data.filter(function (el) {
+                        return (el.id == selectedOrderId)
+                    }))[0]
+                    const selected = selectedOrder.orderlist.map((o) => ({
+                        id: o.id, productId: o.product.id,
+                        productName: o.product.name,
+                        quantity: o.quantity,
+                        customer_id: selectedOrder.customer.id,
+                        customer_name: selectedOrder.customer.name,
+                        order_id: selectedOrder.id
+                    }));
+                    setSelectedItems(selected)
+
+                }
+
             }, 50);
+
         });
 
 
@@ -57,9 +82,10 @@ export default function QueueTable(
 
     useEffect(() => {
         loadOrders();
+
     }, []);
 
-    const orderListTemplate = (rowData: OrderItem) => {
+    const orderListBody = (rowData: OrderItem) => {
         return (
             <>
                 <p className="font-medium">{rowData.customer_name}</p>
@@ -77,13 +103,9 @@ export default function QueueTable(
         )
     }
 
-    const handleSelected = () => {
-        handleSelectedItems(selectedItems)
-    }
-
-    function clearSelected() {
-        setSelectedItems([]);
-        handleSelectedItems([])
+    const handleSelected = (eventValue: OrderItem[]) => {
+        setSelectedItems(eventValue)
+        handleSelectedItems(eventValue)
     }
 
     const TableHeader = () => {
@@ -104,29 +126,52 @@ export default function QueueTable(
         )
     }
 
+    const splitOrderBody = (rowData: OrderItem) => {
+        return (
+            <Button className='flex h-2rem' onClick={function () {
+                setSplitOrderDialogOpen(true);
+                setSelectedSplit(rowData)
+            }}>
+                Bagi
+            </Button>
+        )
+    }
+
+    const toastFeedback = (message: String, severity: "info" | "warn" | "error" | "success") => {
+        toast.current?.show({ severity: severity ?? "info", summary: 'Feedback Message:', detail: message, life: 3000 });
+    }
+
+    const splitOrderDialogBody = () => {
+        return (
+            <>
+            </>
+        )
+    }
 
     return (
         <div>
             <Toast ref={toast} />
             <TableHeader />
+
             <DataTable
                 size='small'
-                scrollable scrollHeight='300px'
+                scrollable
                 value={getOrderList(queuedOrders)} dataKey="id"
                 selectionMode='multiple' selection={selectedItems!}
-                onSelectionChange={(e) => setSelectedItems(e.value)}
+                onSelectionChange={(e) => handleSelected(e.value)}
                 sortField='deliveryAt' sortOrder={1}
             >
                 <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
-                <Column body={orderListTemplate} header='Pilih pesanan:' style={{ minWidth: '15rem' }} />
-            </DataTable>
-            <div className="flex align-items-center justify-content-center mt-3 ml-2 p-0 ">
-                <Button className='justify-content-center w-12rem' severity='info' onClick={handleSelected} size='large' rounded raised>Buat Resep&nbsp;<i className='pi pi-file-import'></i></Button>
-            </div>
-            <div className="flex align-items-center justify-content-center mt-3 ml-2 p-0 ">
-                <Button className='justify-content-center w-12rem' severity='danger' onClick={clearSelected} size='large' rounded raised><i className='pi pi-trash'></i>&nbsp;Buang Resep</Button>
-            </div>
+                <Column body={orderListBody} header='Pilih pesanan:' style={{ minWidth: '15rem' }} />
+                <Column body={splitOrderBody} style={{ minWidth: '3rem' }} />
 
+            </DataTable>
+
+            <Dialog modal className="p-fluid" style={{ width: '380px' }}
+                visible={splitOrderDialogOpen} header={"Order Details"}
+                onHide={function () { setSplitOrderDialogOpen(false) }}>
+                {splitOrderDialogBody()}
+            </Dialog>
         </div>
     )
 }

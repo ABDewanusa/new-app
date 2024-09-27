@@ -43,6 +43,8 @@ import {
   deleteOrder
 } from '@/app/lib/action'
 
+import Link from 'next/link';
+
 export default function OrdersTable() {
   let defaultOrderDate = new Date();
   let defaultDeliveryDate = (() => {
@@ -417,10 +419,10 @@ export default function OrdersTable() {
 
             />
           </div>
-          <div className='col-fixed mr-1' style={{ "width": "195px" }}>
+          <div className='col-fixed mr-1' style={{ "width": "145px" }}>
             <Dropdown name="product" inputId="Product" value={product} onChange={(e) => setProduct(e.value)}
               options={products} optionLabel="name"
-              placeholder="Select a Product" className="w-full"
+              placeholder="Pilih produk" className="w-full"
             />
           </div>
           <div className="col-fixed float-right " style={{ "width": "25px" }}>
@@ -498,7 +500,6 @@ export default function OrdersTable() {
     return (
       <div className="grid">
         <div className="col">
-          {/* <p>{JSON.stringify(selectedOrder)}</p> */}
           <div className="mb-2">
             <div className="grid">
               <div className="col">
@@ -525,10 +526,14 @@ export default function OrdersTable() {
             <p className="font-medium">{selectedOrder?.orderedAt ? formatDateTime(selectedOrder.orderedAt) : ""}</p>
           </div>
           <div className="mb-2">
-            <p>Tanggal Kirim:</p>
-            <p className="font-medium flex align-items-center ">
+            <p className='flex align-items-center'>Tanggal Kirim:
+              <Button onClick={function () { setEditDeliveryDate(true); setEditStatus(false); setEditOrderProduct(false) }} icon="pi pi-pen-to-square" size="small" text rounded >
+                &nbsp;Ubah
+              </Button>
+            </p>
+            <p className="font-medium align-items-center ">
               {selectedOrder?.deliveryAt ? formatDateTime(selectedOrder.deliveryAt) : ""}
-              <Button onClick={function () { setEditDeliveryDate(true); setEditStatus(false); setEditOrderProduct(false) }} icon="pi pi-pen-to-square" size="small" text rounded />
+
             </p>
             <div className="flex">
               {editDeliveryDate ? formDeliveryDate() : ""}
@@ -572,12 +577,22 @@ export default function OrdersTable() {
             <div className="grid">
               <div className="col">
                 <div className="flex align-items-center justify-content-center">
-                  <Button className='font-medium w-8rem justify-content-center' severity='info' onClick={loadOrders} size='small' raised icon="pi pi-file-export">&nbsp;Buat Resep</Button>
+                  <Link
+                    href={{
+                      pathname: "/dashboard/production-planning",
+                      query: {
+                        selectedOrderId: selectedOrder?.id
+                      }
+
+                    }} rel="noopener noreferrer"
+                    className='p-button p-button-info text-md rounded-full shadow-lg font-medium w-9rem justify-content-center'
+                  >
+                    Buat Resep&nbsp;&nbsp;<i className="pi pi-file-export" />
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-          <Divider />
         </div>
 
       </div>
@@ -588,8 +603,14 @@ export default function OrdersTable() {
     return (
       <div className="grid">
         <div className="col">
-          <div className="mb-2">
-            <p>Pemesan:</p>
+          <div className="mb-3">
+            <p>
+              <span className='border-circle w-2rem h-2rem inline-flex font-bold justify-content-center align-items-center text-md bg-green-300 text-green-900'>
+                1
+              </span>
+              &nbsp;Pemesan:
+            </p>
+            <div className='mt-2'></div>
             <Dropdown name='customer' inputId='Customer'
               value={customer}
               onChange={(e) => setCustomer(e.value)}
@@ -597,36 +618,54 @@ export default function OrdersTable() {
               placeholder="Pilih pelanggan" className="w-full"
             />
           </div>
-          <div className="mb-2">
-            <p>Tanggal Pesan:</p>
-            <div className="grid grid-nogutter py-2 ">
-              <div className="col">
-                <Calendar value={newOrderDate}
-                  onChange={(e) => setNewOrderDate(e.value ?? defaultDeliveryDate)}
-                />
-              </div>
+          <div className="mb-3">
+            <p>
+              <span className='border-circle w-2rem h-2rem inline-flex font-bold justify-content-center align-items-center text-md bg-green-300 text-green-900'>
+                2
+              </span>
+              &nbsp;Tanggal Pesan:
+            </p>
+            <div className="mt-2">
+              <Calendar value={newOrderDate}
+                onChange={(e) => setNewOrderDate(e.value ?? defaultDeliveryDate)}
+              />
             </div>
+          </div>
+          <div className="mb-3">
+            <p>
+              <span className='border-circle w-2rem h-2rem inline-flex font-bold justify-content-center align-items-center text-md bg-green-300 text-green-900'>
+                3
+              </span>
+              &nbsp;
+              Tanggal Kirim:
+            </p>
+
+            {formDeliveryDate()}
+
 
           </div>
-          <div className="mb-2">
-            <p>Tanggal Kirim:</p>
-            <div className="grid mt-1">
-              <div className="col">
-                {formDeliveryDate()}
-              </div>
-            </div>
-
-          </div>
-          <div className="mb-2">
-            <p>Status:</p>
+          <div className="mb-3">
+            <p>
+              <span className='border-circle w-2rem h-2rem inline-flex font-bold justify-content-center align-items-center text-md bg-green-300 text-green-900'>
+                4
+              </span>
+              &nbsp;
+              Status:
+            </p>
             <div className="flex">
               {formStatus()}
             </div>
           </div>
-          <div className="mb-2">
-            <p>Rincian Pesanan:</p>
-            {formAddOrderProduct()}
+          <div className="mb-3">
+            <p>
+              <span className='border-circle w-2rem h-2rem inline-flex font-bold justify-content-center align-items-center text-md bg-green-300 text-green-900'>
+                5
+              </span>
+              &nbsp;
+              Rincian Pesanan:
+            </p>
             {orderListTable()}
+            {formAddOrderProduct()}
           </div>
           <div className="flex justify-content-end mt-5 ">
             <Button

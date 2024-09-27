@@ -8,6 +8,7 @@ import {
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { signOut } from '@/auth'
+import { send } from "process";
 
 
 
@@ -64,6 +65,23 @@ export async function createOrder(data: NewOrder) {
 
         feedback.message = "New order created successfully."
         feedback.severity = "success"
+
+        const eBakeryId = "-1002266113223" //eBakery group chat
+        const MyId = "7950865751" // myId
+        const BobId = "6458283705" // bob
+        var teleMessage = "[New Order]%0A%0A"
+        teleMessage += `<blockquote><b>${data.customer.name}</b> just ordered:%0A`
+        for (var order of data.orderlist) {
+
+            teleMessage += `@ ${order.quantity} x ${order.productName},%0A`
+        }
+        teleMessage += `to be delivered at <b>${data.deliveryAt.toDateString()}</b></blockquote>`
+        // const res = await sendTele(teleMessage, eBakeryId)
+        // const res2 = await sendTele(teleMessage, BobId)
+        const res3 = await sendTele(teleMessage, MyId)
+        // feedback.message += ` ${res.message}`
+        // feedback.message += ` ${res2.message}`
+        feedback.message += ` ${res3.message}`
     } catch {
         feedback.message = "Failed to create new order."
         feedback.severity = "error"
@@ -200,4 +218,59 @@ export async function authenticate(
 
 export async function logOut() {
     await signOut();
+}
+
+export async function http<T>(
+    request: RequestInfo
+): Promise<T> {
+    const response = await fetch(request);
+    const body = await response.json();
+    return body;
+}
+
+
+
+export async function sendTele(message: string, chatId: string) {
+    interface teleResponse {
+        ok: boolean,
+        result: {
+            chat: {
+                type: string
+                title: string
+                first_name: string
+            }
+        }
+    }
+    const token = "7987562686:AAGVOaVQrxT4lSuXe2v9xnbC8FU5cXpSDLo"
+    const url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chatId + "&text=" + message + "&parse_mode=HTML"
+
+    const fb: {
+        message: String,
+        data: Object,
+        severity: "info" | "warn" | "error" | "success"
+    } = { message: "()", data: {}, severity: "warn" }
+    console.log(url)
+
+    try {
+
+        const res = await http<teleResponse>(url)
+        var name: string = "unknown"
+        if (res.result.chat.type == "supergroup") {
+            name = res.result.chat.title
+        } else if (res.result.chat.type == "private") {
+            name = res.result.chat.first_name
+        } else {
+            name = "unknown"
+        }
+        fb.message = `Message sent to ${name}`
+        fb.severity = "success"
+
+
+    } catch (error) {
+        fb.message = "Something went wrong."
+        fb.severity = "error"
+    }
+    return fb
+
+
 }

@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import {
-    FormattedOrder,
     Product,
     OrderItem
 } from '@/app/lib/definitions';
 import {
     fetchProducts,
+    fetchOrders
 } from "@/app/lib/raw_data"
 import { Card } from 'primereact/card';
 import QueueTable from "@/app/ui/production-planning/simplified-queue-table";
@@ -16,24 +16,46 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from "primereact/button";
 
-export default function MakeRecipe() {
+export default function MakeRecipe({ selectedOrderId }: { selectedOrderId: string | undefined }) {
 
     const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     useEffect(() => {
         fetchProducts().then((data) => setProducts(data))
+        fetchOrders().then((data) => {
+
+
+
+            if (selectedOrderId) {
+                const selectedOrder = (data.filter(function (el) {
+                    return (el.id == selectedOrderId)
+                }))[0]
+                const selected = selectedOrder.orderlist.map((o) => ({
+                    id: o.id, productId: o.product.id,
+                    productName: o.product.name,
+                    quantity: o.quantity,
+                    customer_id: selectedOrder.customer.id,
+                    customer_name: selectedOrder.customer.name,
+                    order_id: selectedOrder.id
+                }));
+                setSelectedItems(selected)
+            }
+
+
+        });
     }, []);
 
     const handleSelectedItems = (data: OrderItem[]): void => {
         setSelectedItems(data)
     }
 
-    const RecipeBody = () => {
+    const productMap = products.reduce((map, product) => {
+        map[product.id] = { name: product.name, gram: product.gramPerUnit * product.unitPerPack };
+        return map;
+    }, {} as { [key: string]: { name: string, gram: number } });
 
-        const productMap = products.reduce((map, product) => {
-            map[product.id] = { name: product.name, gram: product.gramPerUnit * product.unitPerPack };
-            return map;
-        }, {} as { [key: string]: { name: string, gram: number } });
+
+    const RecipeBody = () => {
 
         const quantityMap = selectedItems.flat().reduce((map, item) => {
             if (!map[item.productId]) {
@@ -44,7 +66,6 @@ export default function MakeRecipe() {
         }, {} as { [key: string]: number });
 
         const result = Object.keys(quantityMap).reduce((obj, productId) => {
-            // obj[productName] = quantityMap[productId];
             obj[productId] = { name: productMap[productId].name, quantity: quantityMap[productId], gramSubTotal: quantityMap[productId] * productMap[productId].gram }
             return obj;
         }, {} as { [key: string]: { name: string, quantity: number, gramSubTotal: number } });
@@ -132,13 +153,14 @@ export default function MakeRecipe() {
     return (
         <div className="flex justify-content-center flex-wrap max-w-full">
 
-            <Card className="flex justify-content-center my-2 md:mr-2 lg:mr-2 shadow-6 w-26rem">
+            <Card className="flex justify-content-center bg-blue-50 my-2 md:mr-2 lg:mr-2 shadow-6 w-26rem">
                 <QueueTable
                     handleSelectedItems={handleSelectedItems}
+                    selectedOrderId={selectedOrderId}
                 />
             </Card>
 
-            <Card className="my-2 md:ml-2 lg:ml-2 shadow-6 bg-red-50 w-26rem">
+            <Card className="my-2 md:ml-2 lg:ml-2 shadow-6 bg-yellow-50 w-26rem">
                 <div className="flex justify-content-center flex-wrap">
                     <p className='flex justify-content-center text-xl font-medium mb-2'>Kartu Rencana Produksi</p>
                 </div>
