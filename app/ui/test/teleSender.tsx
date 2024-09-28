@@ -14,13 +14,15 @@ export default function TeleSender() {
         toast.current?.show({ severity: severity ?? "info", summary: 'Feedback Message:', detail: message, life: 3000 });
     }
 
-    // const chatId = "-1002266113223" //eBakery group chat
-    const chatId = "7950865751" // myId
-    // const chatId = "6458283705" // bob
+    const chatId = "-1002266113223" //eBakery group chat
+    // const chatId = "7950865751" // myId
+    const chatId2 = "6458283705" // bob
     const sendMessage = async () => {
         const feedback = await sendTele(message, chatId)
+        const feedback2 = await sendTele(message, chatId2)
         toastFeedback(feedback.message, feedback.severity)
-        console.log(feedback.data)
+        toastFeedback(feedback2.message, feedback2.severity)
+        // console.log(feedback.data)
     }
 
     return (
