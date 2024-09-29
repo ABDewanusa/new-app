@@ -67,7 +67,7 @@ export async function createOrder(data: NewOrder) {
         feedback.severity = "success"
 
         const eBakeryId = "-1002266113223" //eBakery group chat
-        const MyId = "7950865751" // myId
+        // const MyId = "7950865751" // myId
         const BobId = "6458283705" // bob
         var teleMessage = "[New Order]%0A%0A"
         teleMessage += `<blockquote><b>${data.customer.name}</b> just ordered:%0A`
@@ -76,12 +76,12 @@ export async function createOrder(data: NewOrder) {
             teleMessage += `@ ${order.quantity} x ${order.productName},%0A`
         }
         teleMessage += `to be delivered at <b>${data.deliveryAt.toDateString()}</b></blockquote>`
-        // const res = await sendTele(teleMessage, eBakeryId)
-        // const res2 = await sendTele(teleMessage, BobId)
-        const res3 = await sendTele(teleMessage, MyId)
-        // feedback.message += ` ${res.message}`
-        // feedback.message += ` ${res2.message}`
-        feedback.message += ` ${res3.message}`
+        const res = await sendTele(teleMessage, eBakeryId)
+        const res2 = await sendTele(teleMessage, BobId)
+        // const res3 = await sendTele(teleMessage, MyId)
+        feedback.message += ` ${res.message}`
+        feedback.message += ` ${res2.message}`
+        // feedback.message += ` ${res3.message}`
     } catch {
         feedback.message = "Failed to create new order."
         feedback.severity = "error"
