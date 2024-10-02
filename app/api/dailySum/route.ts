@@ -20,16 +20,19 @@ export async function GET(request: Request) {
     const eBakeryId = "-1002266113223" //eBakery group chat
     var teleMessage = "[Orders Queue]%0A%0A"
 
-    for (var order of filtered) {
-        teleMessage += `<blockquote><b>${order.customer.name}</b> ordered:%0A`
-        for (var orderitem of order.orderlist) {
-            teleMessage += `@ ${orderitem.quantity} x ${orderitem.productName},%0A`
+    if (filtered.length == 0) {
+        teleMessage += "(... there's no new order)"
+    } else {
+        for (var order of filtered) {
+            teleMessage += `<blockquote><b>${order.customer.name}</b> ordered:%0A`
+            for (var orderitem of order.orderlist) {
+                teleMessage += `@ ${orderitem.quantity} x ${orderitem.productName},%0A`
+            }
+            teleMessage += `to be delivered at <b>${order.deliveryAt.toDateString()}</b></blockquote>%0A`
         }
-        teleMessage += `to be delivered at <b>${order.deliveryAt.toDateString()}</b></blockquote>%0A`
     }
 
     const feedback = await sendTele(teleMessage, eBakeryId)
-
 
     return new Response(`${feedback.message}`, {
         status: 200,
