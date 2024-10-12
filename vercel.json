@@ -3,10 +3,6 @@
         {
             "path": "/api/dailySum",
             "schedule": "59 16 * * *"
-        },
-        {
-            "path": "/api/tes",
-            "schedule": "0 9 * * *"
         }
     ]
 }

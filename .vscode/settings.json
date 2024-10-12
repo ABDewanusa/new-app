@@ -4,5 +4,6 @@
     },
     "files.associations": {
         "*.scss": "postcss"
-    }
+    },
+    "CodeGPT.apiKey": "CodeGPT Plus Beta"
 }

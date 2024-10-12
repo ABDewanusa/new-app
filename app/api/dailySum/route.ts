@@ -15,8 +15,8 @@ export async function GET(request: Request) {
     })
 
 
-    console.log(orders)
-    console.log(filtered)
+    // console.log(orders)
+    // console.log(filtered)
     const eBakeryId = "-1002266113223" //eBakery group chat
     var teleMessage = "[Orders Queue]%0A%0A"
 
